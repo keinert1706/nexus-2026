@@ -1,0 +1,90 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus 2026</title>
+<meta name="description" content="Confirma tu asistencia a Nexus 2026 — el encuentro del futuro y la excelencia.">
+<link rel="icon" type="image/svg+xml" href="assets/rombo.svg">
+<link rel="stylesheet" href="css/styles.css">
+
+<div class="wrap">
+  <img src="assets/rombo.svg" class="bg-rombo bg-rombo-top" alt="" aria-hidden="true">
+  <img src="assets/rombo.svg" class="bg-rombo bg-rombo-bottom" alt="" aria-hidden="true">
+
+  <div class="page">
+
+    <!-- ===== Hero ===== -->
+    <div class="hero" id="heroBlock">
+      <img src="assets/logo-nexus.png" class="logo-img logo-img-hero" alt="Nexus 2026">
+      <div class="event-date" id="metaDate"></div>
+      <div class="event-location" id="metaLocation"></div>
+      <svg class="chevron" width="30" height="18" viewBox="0 0 30 18">
+        <polyline points="2,16 15,4 28,16" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </div>
+
+    <!-- ===== Formulario RSVP ===== -->
+    <form id="rsvpForm" novalidate>
+      <div id="errorBanner" class="banner banner-error hidden"></div>
+
+      <div class="field">
+        <div class="eyebrow">Confirmación de asistencia</div>
+        <label for="nombre_completo">Nombre completo</label>
+        <input type="text" id="nombre_completo" name="nombre_completo" autocomplete="name" placeholder="Tu nombre" required>
+        <div class="field-error" id="err_nombre_completo"></div>
+      </div>
+
+      <div class="field">
+        <label for="email">Correo electrónico</label>
+        <input type="email" id="email" name="email" autocomplete="email" placeholder="tu@correo.com" required>
+        <div class="field-error" id="err_email"></div>
+      </div>
+
+      <div class="field">
+        <label for="telefono">Teléfono <span class="optional-tag">(opcional)</span></label>
+        <input type="tel" id="telefono" name="telefono" autocomplete="tel" placeholder="+57 300 0000000">
+      </div>
+
+      <div class="field">
+        <label>¿Asistirás?</label>
+        <div class="toggle-group" id="confirmacionToggle">
+          <button type="button" class="toggle-btn" data-value="true">Sí</button>
+          <button type="button" class="toggle-btn" data-value="false">No</button>
+        </div>
+        <div class="field-error" id="err_confirmacion"></div>
+      </div>
+
+      <div id="menuSection" class="menu-section hidden">
+        <div class="eyebrow">Menú</div>
+
+        <div class="menu-grid" id="menuGrid"></div>
+        <div class="field-error" id="err_menu"></div>
+
+        <div class="field">
+          <label>¿Eres vegetariano o tienes alguna restricción alimentaria?</label>
+          <div class="allergy-list" id="allergyGrid"></div>
+          <input type="text" id="alergias_otro" name="alergias_otro" placeholder="Otra alergia" maxlength="300" style="margin-top:12px;">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary" id="submitBtn">Confirmar asistencia</button>
+    </form>
+
+    <!-- ===== Pantalla de confirmación ===== -->
+    <div id="confirmationCard" class="confirmation hidden">
+      <img src="assets/logo-nexus.png" class="logo-img logo-img-confirmation" alt="Nexus 2026">
+      <div class="divider"></div>
+      <h2 id="confirmationTitle">¡Gracias!</h2>
+      <p id="confirmationMessage"></p>
+
+      <div class="calendar-actions" id="calendarActions">
+        <a class="btn-outline" id="googleCalBtn" target="_blank" rel="noopener">Agregar a Google Calendar</a>
+        <button type="button" class="btn-outline" id="icsBtn">Descargar .ics</button>
+      </div>
+
+      <button type="button" class="btn-link" id="editBtn">Editar respuesta</button>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/main.js"></script>

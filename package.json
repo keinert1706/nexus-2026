@@ -1,0 +1,9 @@
+{
+  "name": "nexus-2026",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Landing page + RSVP + dashboard para el evento Nexus 2026",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  }
+}
