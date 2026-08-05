@@ -16,7 +16,7 @@ body { display: flex; justify-content: center; align-items: flex-start; }
   gap: 10px;
 }
 
-.dash-header .logo-wordmark { font-size: 22px; }
+.dash-logo { height: 36px; width: auto; }
 
 .btn-logout {
   background: transparent;
