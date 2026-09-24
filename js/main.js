@@ -173,8 +173,7 @@
     const params = new URLSearchParams({
       action: 'TEMPLATE',
       text: CONFIG.eventName,
-      // Google exige inicio/fin; sin hora de fin, ambos son el inicio.
-      dates: `${toICSDate(CONFIG.eventStartISO)}/${toICSDate(CONFIG.eventStartISO)}`,
+      dates: `${toICSDate(CONFIG.eventStartISO)}/${toICSDate(CONFIG.eventEndISO)}`,
       details: buildEventDetails(),
     });
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
@@ -189,6 +188,7 @@
       `UID:${Date.now()}@nexus2026`,
       `DTSTAMP:${toICSDate(new Date().toISOString())}`,
       `DTSTART:${toICSDate(CONFIG.eventStartISO)}`,
+      `DTEND:${toICSDate(CONFIG.eventEndISO)}`,
       `SUMMARY:${escapeICS(CONFIG.eventName)}`,
       `DESCRIPTION:${escapeICS(buildEventDetails())}`,
       `URL:${CONFIG.meet.url}`,

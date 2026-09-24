@@ -9,15 +9,15 @@ window.NEXUS_CONFIG = {
 
   // Texto que se muestra en la landing (edítalo libremente).
   // El evento es virtual (Google Meet, ver "meet" abajo): no tiene ubicación.
-  dateLabel: '5 de octubre · 2:00 PM',
+  dateLabel: '5 de octubre · 2:00 PM - 6:00 PM',
 
-  // Fecha/hora REAL de inicio en formato ISO 8601, usada por los botones de
-  // calendario (Google Calendar y el archivo .ics). El "-05:00" es la zona
-  // horaria de Bogotá. Si el evento es en otro país, ajusta el offset.
-  // IMPORTANTE: si cambias dateLabel arriba, actualiza también esta línea
+  // Fecha/hora REAL en formato ISO 8601, usadas por los botones de calendario
+  // (Google Calendar y el archivo .ics). El "-05:00" es la zona horaria de
+  // Bogotá. Si el evento es en otro país, ajusta el offset.
+  // IMPORTANTE: si cambias dateLabel arriba, actualiza también estas dos líneas
   // para que el botón de calendario coincida con lo que dice la landing.
-  // No hay hora de fin: el evento se agenda solo con su hora de inicio.
   eventStartISO: '2026-10-05T14:00:00-05:00',
+  eventEndISO: '2026-10-05T18:00:00-05:00',
 
   // Datos de la videollamada: se incluyen en la descripción del evento que se
   // agenda desde Google Calendar y desde el archivo .ics.
