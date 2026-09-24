@@ -58,7 +58,8 @@ Todo lo editable vive en **un solo archivo**: [`js/config.js`](js/config.js). Pa
 
 1. En GitHub, abre el archivo `js/config.js`, clic en el ícono de lápiz (Edit).
 2. Cambia lo que necesites:
-   - `dateLabel` / `locationLabel` → el texto que ven los invitados ("15 de octubre · 6:00 PM", "Lugar por confirmar").
+   - `dateLabel` → la fecha que ven los invitados ("15 de octubre · 6:00 PM").
+   - `meet` → los datos de la videollamada de Google Meet que se incluyen al agendar el evento.
    - `eventStartISO` → la fecha/hora real de inicio que se usa para los botones de calendario (formato `AAAA-MM-DDTHH:MM:SS-05:00`). **Actualiza esto junto con `dateLabel`** para que el calendario coincida con lo que dice la landing.
    - `cargoOptions` → las opciones de cargo (si agregas una, agrégala también en `ALLOWED_CARGOS` de `netlify/functions/submit-rsvp.js`).
    - `tagline` → el texto bajo el logo.

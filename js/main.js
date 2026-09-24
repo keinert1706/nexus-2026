@@ -9,7 +9,6 @@
 
   // ---------- Render meta info ----------
   $('metaDate').textContent = CONFIG.dateLabel;
-  $('metaLocation').textContent = CONFIG.locationLabel;
 
   // ---------- Cargo ----------
   const cargoToggle = $('cargoToggle');
@@ -133,7 +132,7 @@
 
     if (payload.confirmacion) {
       $('confirmationTitle').textContent = `¡Gracias, ${firstName}!`;
-      $('confirmationMessage').textContent = `Tu asistencia a ${CONFIG.eventName} quedó confirmada. Te esperamos el ${CONFIG.dateLabel} en ${CONFIG.locationLabel}.`;
+      $('confirmationMessage').textContent = `Tu asistencia a ${CONFIG.eventName} quedó confirmada. Te esperamos el ${CONFIG.dateLabel}.`;
       $('googleCalBtn').href = buildGoogleCalendarUrl();
       $('icsBtn').addEventListener('click', downloadICS);
     } else {
@@ -153,14 +152,30 @@
     return new Date(isoString).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
   }
 
+  function buildEventDetails() {
+    const { meet } = CONFIG;
+    return [
+      CONFIG.tagline,
+      '',
+      'Información para unirse con Google Meet',
+      `Enlace de la videollamada: ${meet.url}`,
+      `O marca el: ${meet.phone} PIN: ${meet.pin}`,
+      `Más números de teléfono: ${meet.moreNumbersUrl}`,
+    ].join('\n');
+  }
+
+  // RFC 5545: en los textos del .ics hay que escapar \ ; , y los saltos de línea.
+  function escapeICS(text) {
+    return String(text).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+  }
+
   function buildGoogleCalendarUrl() {
     const params = new URLSearchParams({
       action: 'TEMPLATE',
       text: CONFIG.eventName,
       // Google exige inicio/fin; sin hora de fin, ambos son el inicio.
       dates: `${toICSDate(CONFIG.eventStartISO)}/${toICSDate(CONFIG.eventStartISO)}`,
-      details: CONFIG.tagline,
-      location: CONFIG.calendarLocation,
+      details: buildEventDetails(),
     });
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
   }
@@ -174,9 +189,9 @@
       `UID:${Date.now()}@nexus2026`,
       `DTSTAMP:${toICSDate(new Date().toISOString())}`,
       `DTSTART:${toICSDate(CONFIG.eventStartISO)}`,
-      `SUMMARY:${CONFIG.eventName}`,
-      `DESCRIPTION:${CONFIG.tagline}`,
-      `LOCATION:${CONFIG.calendarLocation}`,
+      `SUMMARY:${escapeICS(CONFIG.eventName)}`,
+      `DESCRIPTION:${escapeICS(buildEventDetails())}`,
+      `URL:${CONFIG.meet.url}`,
       'END:VEVENT',
       'END:VCALENDAR',
     ].join('\r\n');

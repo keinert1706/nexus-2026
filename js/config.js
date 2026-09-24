@@ -8,12 +8,8 @@ window.NEXUS_CONFIG = {
   tagline: 'El encuentro del futuro y la excelencia',
 
   // Texto que se muestra en la landing (edítalo libremente).
+  // El evento es virtual (Google Meet, ver "meet" abajo): no tiene ubicación.
   dateLabel: '5 de octubre · 2:00 PM',
-  locationLabel: 'Maloka - Centro Interactivo, Cra 68D #24A-51, Ciudad Salitre, Bogotá',
-
-  // Versión corta del lugar, usada en el link de Google Calendar y el .ics
-  // (para que la URL/el evento de calendario no queden demasiado largos).
-  calendarLocation: 'Maloka - Centro Interactivo, Cra 68D #24A-51, Bogotá',
 
   // Fecha/hora REAL de inicio en formato ISO 8601, usada por los botones de
   // calendario (Google Calendar y el archivo .ics). El "-05:00" es la zona
@@ -22,6 +18,15 @@ window.NEXUS_CONFIG = {
   // para que el botón de calendario coincida con lo que dice la landing.
   // No hay hora de fin: el evento se agenda solo con su hora de inicio.
   eventStartISO: '2026-10-05T14:00:00-05:00',
+
+  // Datos de la videollamada: se incluyen en la descripción del evento que se
+  // agenda desde Google Calendar y desde el archivo .ics.
+  meet: {
+    url: 'https://meet.google.com/gkw-ygip-ayd',
+    phone: '(CO) +57 601 8957114',
+    pin: '890 695 130#',
+    moreNumbersUrl: 'https://tel.meet/gkw-ygip-ayd?pin=5122081285806',
+  },
 
   // Opciones de cargo (obligatorio). "value" es lo que se guarda en la base de
   // datos; si agregas una opción aquí, agrégala también en ALLOWED_CARGOS de
