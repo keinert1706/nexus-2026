@@ -1,6 +1,6 @@
-const { getSupabaseAdmin } = require('./_shared/supabaseAdmin');
+const { getSql } = require('./_shared/db');
 
-const ALLOWED_ALLERGIES = ['gluten', 'lacteos', 'frutos_secos', 'vegetariano', 'vegano', 'ninguna'];
+const ALLOWED_CARGOS = ['gerente', 'asesor', 'administrador'];
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
@@ -31,51 +31,29 @@ exports.handler = async (event) => {
 
   const telefono = typeof body.telefono === 'string' ? body.telefono.trim().slice(0, 30) : null;
 
+  const cargo = typeof body.cargo === 'string' ? body.cargo.trim() : '';
+  if (!ALLOWED_CARGOS.includes(cargo)) {
+    errors.cargo = 'Selecciona tu cargo';
+  }
+
   if (typeof body.confirmacion !== 'boolean') {
     errors.confirmacion = 'Debes indicar si asistirás o no';
   }
   const confirmacion = body.confirmacion === true;
 
-  let menu = null;
-  let alergias = [];
-  let alergiasOtro = null;
-
-  if (confirmacion) {
-    menu = typeof body.menu === 'string' ? body.menu.trim() : '';
-    if (!menu || menu.length > 100) {
-      errors.menu = 'Debes elegir una opción de menú';
-    }
-
-    if (Array.isArray(body.alergias)) {
-      alergias = body.alergias
-        .filter((tag) => typeof tag === 'string' && ALLOWED_ALLERGIES.includes(tag))
-        .slice(0, ALLOWED_ALLERGIES.length);
-    }
-
-    alergiasOtro = typeof body.alergias_otro === 'string' ? body.alergias_otro.trim().slice(0, 300) || null : null;
-  }
-
   if (Object.keys(errors).length > 0) {
     return respond(400, { error: 'Revisa los campos del formulario', fields: errors });
   }
 
-  const supabase = getSupabaseAdmin();
-
-  const { data, error } = await supabase
-    .from('asistentes')
-    .insert({
-      nombre_completo: nombreCompleto,
-      email,
-      telefono: telefono || null,
-      confirmacion,
-      menu,
-      alergias,
-      alergias_otro: alergiasOtro,
-    })
-    .select('id, nombre_completo, email, confirmacion, menu, created_at')
-    .single();
-
-  if (error) {
+  try {
+    const sql = getSql();
+    const [asistente] = await sql`
+      insert into asistentes (nombre_completo, email, telefono, cargo, confirmacion)
+      values (${nombreCompleto}, ${email}, ${telefono || null}, ${cargo}, ${confirmacion})
+      returning id, nombre_completo, email, cargo, confirmacion, created_at
+    `;
+    return respond(200, { ok: true, asistente });
+  } catch (error) {
     // 23505 = violación de restricción única (email duplicado). Confiamos en la restricción
     // de la base de datos -en vez de "verificar antes de insertar"- para evitar la condición
     // de carrera de dos registros simultáneos con el mismo email (p. ej. pico de tráfico por WhatsApp).
@@ -86,8 +64,6 @@ exports.handler = async (event) => {
     console.error('Error insertando asistente:', error);
     return respond(500, { error: 'No pudimos guardar tu registro. Intenta de nuevo en unos segundos.' });
   }
-
-  return respond(200, { ok: true, asistente: data });
 };
 
 function respond(statusCode, bodyObj) {

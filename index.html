@@ -44,25 +44,18 @@
       </div>
 
       <div class="field">
+        <label>Cargo</label>
+        <div class="toggle-group" id="cargoToggle"></div>
+        <div class="field-error" id="err_cargo"></div>
+      </div>
+
+      <div class="field">
         <label>¿Asistirás?</label>
         <div class="toggle-group" id="confirmacionToggle">
           <button type="button" class="toggle-btn" data-value="true">Sí</button>
           <button type="button" class="toggle-btn" data-value="false">No</button>
         </div>
         <div class="field-error" id="err_confirmacion"></div>
-      </div>
-
-      <div id="menuSection" class="menu-section hidden">
-        <div class="eyebrow">Menú</div>
-
-        <div class="menu-grid" id="menuGrid"></div>
-        <div class="field-error" id="err_menu"></div>
-
-        <div class="field">
-          <label>¿Eres vegetariano o tienes alguna restricción alimentaria?</label>
-          <div class="allergy-list" id="allergyGrid"></div>
-          <input type="text" id="alergias_otro" name="alergias_otro" placeholder="Otra alergia" maxlength="300" style="margin-top:12px;">
-        </div>
       </div>
 
       <button type="submit" class="btn-primary" id="submitBtn">Confirmar asistencia</button>

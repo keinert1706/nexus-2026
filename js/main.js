@@ -4,13 +4,28 @@
 
   const state = {
     confirmacion: null,
-    menu: null,
-    alergias: new Set(),
+    cargo: null,
   };
 
   // ---------- Render meta info ----------
   $('metaDate').textContent = CONFIG.dateLabel;
   $('metaLocation').textContent = CONFIG.locationLabel;
+
+  // ---------- Cargo ----------
+  const cargoToggle = $('cargoToggle');
+  CONFIG.cargoOptions.forEach((option) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'toggle-btn';
+    btn.dataset.value = option.value;
+    btn.textContent = option.label;
+    btn.addEventListener('click', () => {
+      state.cargo = option.value;
+      cargoToggle.querySelectorAll('.toggle-btn').forEach((b) => b.classList.toggle('active', b === btn));
+      setFieldError('cargo', '');
+    });
+    cargoToggle.appendChild(btn);
+  });
 
   // ---------- Toggle Sí/No ----------
   const toggleButtons = document.querySelectorAll('#confirmacionToggle .toggle-btn');
@@ -19,66 +34,8 @@
       const value = btn.dataset.value === 'true';
       state.confirmacion = value;
       toggleButtons.forEach((b) => b.classList.toggle('active', b === btn));
-      $('menuSection').classList.toggle('hidden', !value);
-      if (!value) {
-        state.menu = null;
-        state.alergias.clear();
-      }
       setFieldError('confirmacion', '');
     });
-  });
-
-  // ---------- Menu cards ----------
-  const menuGrid = $('menuGrid');
-  CONFIG.menuOptions.forEach((option) => {
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.className = 'menu-card';
-    card.dataset.value = option.value;
-    card.innerHTML = `<p class="menu-label">${option.label}</p><p class="menu-desc">${option.description || ''}</p>`;
-    card.addEventListener('click', () => {
-      state.menu = option.value;
-      menuGrid.querySelectorAll('.menu-card').forEach((c) => c.classList.toggle('selected', c === card));
-      setFieldError('menu', '');
-    });
-    menuGrid.appendChild(card);
-  });
-
-  // ---------- Allergy checkboxes ----------
-  // "Ninguna" es excluyente: marcarla desmarca las demás, y marcar cualquier
-  // otra desmarca "Ninguna" (igual que el diseño aprobado).
-  const allergyGrid = $('allergyGrid');
-  const allergyInputs = [];
-
-  CONFIG.allergyOptions.forEach((option) => {
-    const row = document.createElement('label');
-    row.className = 'allergy-row';
-    row.innerHTML = `<input type="checkbox" value="${option.value}"> <span>${option.label}</span>`;
-    const input = row.querySelector('input');
-    allergyInputs.push(input);
-
-    input.addEventListener('change', () => {
-      if (option.value === 'ninguna') {
-        if (input.checked) {
-          state.alergias.clear();
-          state.alergias.add('ninguna');
-          allergyInputs.forEach((i) => { if (i !== input) i.checked = false; });
-        } else {
-          state.alergias.delete('ninguna');
-        }
-      } else {
-        const ninguna = allergyInputs.find((i) => i.value === 'ninguna');
-        if (input.checked) {
-          if (ninguna) ninguna.checked = false;
-          state.alergias.delete('ninguna');
-          state.alergias.add(option.value);
-        } else {
-          state.alergias.delete(option.value);
-        }
-      }
-    });
-
-    allergyGrid.appendChild(row);
   });
 
   // ---------- Validation helpers ----------
@@ -90,7 +47,7 @@
   }
 
   function clearErrors() {
-    ['nombre_completo', 'email', 'confirmacion', 'menu'].forEach((f) => setFieldError(f, ''));
+    ['nombre_completo', 'email', 'cargo', 'confirmacion'].forEach((f) => setFieldError(f, ''));
     $('errorBanner').classList.add('hidden');
   }
 
@@ -115,19 +72,16 @@
     let hasError = false;
     if (!nombreCompleto) { setFieldError('nombre_completo', 'Este campo es obligatorio'); hasError = true; }
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setFieldError('email', 'Ingresa un email válido'); hasError = true; }
+    if (!state.cargo) { setFieldError('cargo', 'Selecciona tu cargo'); hasError = true; }
     if (state.confirmacion === null) { setFieldError('confirmacion', 'Indica si asistirás'); hasError = true; }
-    if (state.confirmacion === true && !state.menu) { setFieldError('menu', 'Elige una opción de menú'); hasError = true; }
-
     if (hasError) return;
 
     const payload = {
       nombre_completo: nombreCompleto,
       email,
       telefono: telefono || null,
+      cargo: state.cargo,
       confirmacion: state.confirmacion,
-      menu: state.confirmacion ? state.menu : null,
-      alergias: state.confirmacion ? Array.from(state.alergias) : [],
-      alergias_otro: state.confirmacion ? ($('alergias_otro').value.trim() || null) : null,
     };
 
     setLoading(true);
@@ -203,7 +157,8 @@
     const params = new URLSearchParams({
       action: 'TEMPLATE',
       text: CONFIG.eventName,
-      dates: `${toICSDate(CONFIG.eventStartISO)}/${toICSDate(CONFIG.eventEndISO)}`,
+      // Google exige inicio/fin; sin hora de fin, ambos son el inicio.
+      dates: `${toICSDate(CONFIG.eventStartISO)}/${toICSDate(CONFIG.eventStartISO)}`,
       details: CONFIG.tagline,
       location: CONFIG.calendarLocation,
     });
@@ -219,7 +174,6 @@
       `UID:${Date.now()}@nexus2026`,
       `DTSTAMP:${toICSDate(new Date().toISOString())}`,
       `DTSTART:${toICSDate(CONFIG.eventStartISO)}`,
-      `DTEND:${toICSDate(CONFIG.eventEndISO)}`,
       `SUMMARY:${CONFIG.eventName}`,
       `DESCRIPTION:${CONFIG.tagline}`,
       `LOCATION:${CONFIG.calendarLocation}`,

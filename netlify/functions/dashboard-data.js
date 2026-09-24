@@ -1,4 +1,4 @@
-const { getSupabaseAdmin } = require('./_shared/supabaseAdmin');
+const { getSql } = require('./_shared/db');
 const { verifyToken, tokenFromEvent } = require('./_shared/auth');
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
@@ -14,49 +14,49 @@ exports.handler = async (event) => {
     return respond(401, { error: 'Sesión inválida o expirada. Vuelve a iniciar sesión.' });
   }
 
-  const supabase = getSupabaseAdmin();
   const action = event.queryStringParameters?.action || 'list';
 
   try {
+    const sql = getSql();
+
     if (action === 'stats') {
-      const { data, error } = await supabase.rpc('asistentes_stats');
-      if (error) throw error;
-      return respond(200, data);
+      const [{ stats }] = await sql`select asistentes_stats() as stats`;
+      return respond(200, stats);
     }
 
+    const [{ count }] = await sql`select count(*)::int as count from asistentes`;
+
     if (action === 'export') {
-      const { data, error, count } = await supabase
-        .from('asistentes')
-        .select('nombre_completo, email, telefono, confirmacion, menu, alergias, alergias_otro, created_at', { count: 'exact' })
-        .order('created_at', { ascending: false })
-        .range(0, MAX_EXPORT_ROWS - 1);
-      if (error) throw error;
-      if (count && count > MAX_EXPORT_ROWS) {
+      const rows = await sql`
+        select nombre_completo, email, telefono, cargo, confirmacion, created_at
+        from asistentes
+        order by created_at desc
+        limit ${MAX_EXPORT_ROWS}
+      `;
+      if (count > MAX_EXPORT_ROWS) {
         console.warn(`Export truncado: ${count} filas totales, se devolvieron ${MAX_EXPORT_ROWS}.`);
       }
-      return respond(200, { rows: data, truncated: !!(count && count > MAX_EXPORT_ROWS) });
+      return respond(200, { rows, truncated: count > MAX_EXPORT_ROWS });
     }
 
     // action === 'list' (por defecto): tabla paginada
     const page = Math.max(1, parseInt(event.queryStringParameters?.page, 10) || 1);
     const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, parseInt(event.queryStringParameters?.pageSize, 10) || 25));
-    const from = (page - 1) * pageSize;
-    const to = from + pageSize - 1;
+    const offset = (page - 1) * pageSize;
 
-    const { data, error, count } = await supabase
-      .from('asistentes')
-      .select('id, nombre_completo, email, telefono, confirmacion, menu, alergias, alergias_otro, created_at', { count: 'exact' })
-      .order('created_at', { ascending: false })
-      .range(from, to);
-
-    if (error) throw error;
+    const rows = await sql`
+      select id, nombre_completo, email, telefono, cargo, confirmacion, created_at
+      from asistentes
+      order by created_at desc
+      limit ${pageSize} offset ${offset}
+    `;
 
     return respond(200, {
-      rows: data,
+      rows,
       page,
       pageSize,
       total: count,
-      totalPages: Math.max(1, Math.ceil((count || 0) / pageSize)),
+      totalPages: Math.max(1, Math.ceil(count / pageSize)),
     });
   } catch (error) {
     console.error('Error en dashboard-data:', error);

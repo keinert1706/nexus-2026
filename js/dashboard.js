@@ -4,13 +4,10 @@
   let currentPage = 1;
   let totalPages = 1;
 
-  const ALLERGY_LABELS = {
-    gluten: 'Gluten',
-    lacteos: 'Lácteos',
-    frutos_secos: 'Frutos secos',
-    vegetariano: 'Vegetariano',
-    vegano: 'Vegano',
-    ninguna: 'Ninguna',
+  const CARGO_LABELS = {
+    gerente: 'Gerente',
+    asesor: 'Asesor',
+    administrador: 'Administrador',
   };
 
   function getToken() { return sessionStorage.getItem('nexus_dashboard_token'); }
@@ -97,8 +94,7 @@
       const pct = stats.total_registros ? Math.round((stats.total_confirmados / stats.total_registros) * 100) : 0;
       $('statPendientes').textContent = `${pct}%`;
 
-      $('menuBreakdown').innerHTML = renderBreakdown(stats.menu_counts);
-      $('allergyBreakdown').innerHTML = renderBreakdown(stats.alergia_counts, ALLERGY_LABELS);
+      $('cargoBreakdown').innerHTML = renderBreakdown(stats.cargo_counts, CARGO_LABELS);
     } catch {
       // los stat tiles simplemente quedan en "–"; el listado abajo mostrará el error si persiste
     }
@@ -146,12 +142,8 @@
       : '<span class="badge badge-no">No asiste</span>';
 
     const metaParts = [];
+    if (row.cargo) metaParts.push(`Cargo: ${CARGO_LABELS[row.cargo] || row.cargo}`);
     if (row.telefono) metaParts.push(`Tel: ${row.telefono}`);
-    if (row.confirmacion && row.menu) metaParts.push(`Menú: ${row.menu}`);
-    if (row.confirmacion && row.alergias?.length) {
-      metaParts.push(`Alergias: ${row.alergias.map((a) => ALLERGY_LABELS[a] || a).join(', ')}`);
-    }
-    if (row.alergias_otro) metaParts.push(`Otra: ${row.alergias_otro}`);
     metaParts.push(new Date(row.created_at).toLocaleString('es'));
 
     el.innerHTML = `
@@ -183,7 +175,7 @@
       const data = await apiGet('export', {});
       if (!data) return;
 
-      const headers = ['nombre_completo', 'email', 'telefono', 'confirmacion', 'menu', 'alergias', 'alergias_otro', 'created_at'];
+      const headers = ['nombre_completo', 'email', 'telefono', 'cargo', 'confirmacion', 'created_at'];
       const csvRows = [headers.join(',')];
 
       data.rows.forEach((row) => {
